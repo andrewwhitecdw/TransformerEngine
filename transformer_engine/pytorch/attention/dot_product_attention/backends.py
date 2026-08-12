@@ -2170,6 +2170,8 @@ class FusedAttention(torch.nn.Module):
             self.use_FAv2_bwd
             and (core_attention_bias_type == "no_bias")
             and (fused_attention_backend == FusedAttnBackend["F16_arbitrary_seqlen"])
+            # FAv2 bwd does not produce d_softmax_offset, which non-vanilla softmax requires.
+            and (self.softmax_type == "vanilla")
         )
 
         if fp8:
