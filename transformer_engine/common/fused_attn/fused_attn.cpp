@@ -612,7 +612,6 @@ void nvte_fused_attn_fwd(const NVTETensor Q, const NVTETensor K, const NVTETenso
   }
   NVTE_QKV_Layout_Group layout_group = nvte_get_qkv_layout_group(qkv_layout);
   if (layout_group == NVTE_QKV_Layout_Group::NVTE_Paged_KV_HD_HD_HD) {
-    NVTE_QKV_Format kv_format = nvte_get_kv_format(qkv_layout);
     if (kv_format == NVTE_QKV_Format::NVTE_BSHD) {
       num_pages_k = input_K->data.shape[0];
       page_size_k = input_K->data.shape[1];
