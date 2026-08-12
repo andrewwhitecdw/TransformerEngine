@@ -1686,6 +1686,24 @@ class FusedAttnFunc(torch.autograd.Function):
             return out_ret, *max_logit
         return out_ret
 
+
+    @staticmethod
+    def _unpack_optional_grads(ctx, rest):
+        """Consume optional d_bias and d_softmax_offset from fused_attn_bwd.
+
+        The number of tensors returned in ``rest`` depends on which optional
+        outputs the selected backend/fuse configuration produces.  They are
+        ordered as ``[d_bias, d_softmax_offset]`` when both are present.
+        """
+        extra_grads = iter(rest)
+        d_bias = None
+        if ctx.attn_bias_type not in ["no_bias", "alibi"]:
+            d_bias = next(extra_grads, None)
+        d_softmax_offset = None
+        if ctx.softmax_type != "vanilla":
+            d_softmax_offset = next(extra_grads, None)
+        return d_bias, d_softmax_offset
+
     @staticmethod
     def backward(ctx, d_out, *_args):
         # pylint: disable=missing-function-docstring
@@ -1933,12 +1951,7 @@ class FusedAttnFunc(torch.autograd.Function):
                         is_graph_capturing(),
                     )
 
-        d_bias = None
-        if ctx.attn_bias_type not in ["no_bias", "alibi"]:
-            d_bias = rest[0]
-        d_softmax_offset = None
-        if ctx.softmax_type != "vanilla":
-            d_softmax_offset = rest[1]
+        d_bias, d_softmax_offset = FusedAttnFunc._unpack_optional_grads(ctx, rest)
         return (
             None,
             None,
