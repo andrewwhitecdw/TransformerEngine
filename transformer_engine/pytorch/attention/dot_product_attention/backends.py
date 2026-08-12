@@ -2013,7 +2013,7 @@ class FusedAttention(torch.nn.Module):
         self.softmax_type = softmax_type
         self.return_max_logit = return_max_logit
 
-        def remove_extra_states_check(self, incompatible_keys):  # pylint: disable=unused-argument
+        def remove_extra_states_check(module, incompatible_keys):  # pylint: disable=unused-argument
             """
             Temporarily remove fused_attention._extra_state as a missing key
             or an unexpected key when loading Transformer Engine checkpoints.
