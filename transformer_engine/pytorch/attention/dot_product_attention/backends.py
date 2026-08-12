@@ -366,7 +366,9 @@ class UnfusedDotProductAttention(torch.nn.Module):
         """Fast attribute set for non-parameter fields."""
         self.__dict__[name] = value
 
-    def forward(self, *args, fp8: bool = False, fp8_output: bool = False, **kwargs) -> torch.Tensor:
+    def forward(
+        self, *args, fp8: bool = False, fp8_output: bool = False, **kwargs
+    ) -> Union[torch.Tensor, Tuple[torch.Tensor, torch.Tensor]]:
         """Unfused attention fprop; see `_forward` for the argument list.
 
         FP8 (emulation and/or Float8Tensor output) is not supported under
@@ -377,7 +379,9 @@ class UnfusedDotProductAttention(torch.nn.Module):
         return self._forward(*args, fp8=False, fp8_output=False, **kwargs)
 
     @no_torch_dynamo()
-    def _forward_eager(self, *args, **kwargs) -> torch.Tensor:
+    def _forward_eager(
+        self, *args, **kwargs
+    ) -> Union[torch.Tensor, Tuple[torch.Tensor, torch.Tensor]]:
         """Eager-only (dynamo-disabled) wrapper around `_forward`."""
         return self._forward(*args, **kwargs)
 
@@ -405,7 +409,7 @@ class UnfusedDotProductAttention(torch.nn.Module):
         fp8_meta: Optional[Dict[str, Any]] = None,
         quantizers=None,
         fp8_output: bool = False,
-    ) -> torch.Tensor:
+    ) -> Union[torch.Tensor, Tuple[torch.Tensor, torch.Tensor]]:
         """Unfused attention fprop"""
         assert (
             qkv_layout in QKVLayouts
