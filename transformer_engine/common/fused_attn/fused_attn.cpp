@@ -720,7 +720,8 @@ void nvte_fused_attn_bwd(const NVTETensor Q, const NVTETensor K, const NVTETenso
     size_t i = 0;
     Tensor *output_S = convertNVTETensorCheck(Aux_CTX_Tensors->tensors[i++]);
     Tensor *input_rng_state = convertNVTETensorCheck(Aux_CTX_Tensors->tensors[i++]);
-    Tensor *input_Bias, *input_SoftmaxOffset;
+    Tensor *input_Bias = nullptr;
+    Tensor *input_SoftmaxOffset = nullptr;
     if ((bias_type != NVTE_NO_BIAS) && (bias_type != NVTE_ALIBI)) {
       input_Bias = convertNVTETensorCheck(Aux_CTX_Tensors->tensors[i++]);
     }
