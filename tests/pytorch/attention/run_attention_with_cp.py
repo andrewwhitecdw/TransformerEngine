@@ -155,7 +155,7 @@ def generate_input_shapes(
             config.num_heads * config.head_dim_v,
         )
     else:
-        assert False, f"{qkv_format=} is not supported!"
+        raise ValueError(f"{qkv_format=} is not supported!")
 
     return (
         q_input_shape,
@@ -187,7 +187,7 @@ def get_tols(config, dtype):
         rtol = 5e-1
         rmse_tol = 0.15
     else:
-        assert False, f"{dtype=} is not supported!"
+        raise ValueError(f"{dtype=} is not supported!")
 
     return atol, rtol, rmse_tol
 
@@ -243,10 +243,11 @@ def run_dpa_with_cp(
             config = copy.deepcopy(model_configs_fused_attn[model])
         else:
             assert False, f"{model=} is not a known FusedAttention CP config!"
-    assert config.attn_mask_type in [
+    if config.attn_mask_type not in [
         "causal",
         "no_mask",
-    ], f"{config.attn_mask_type=} is not supported!"
+    ]:
+        raise ValueError(f"{config.attn_mask_type=} is not supported!")
     if qkv_format == "thd":
         if "causal" in config.attn_mask_type:
             config.attn_mask_type = "padding_causal"
@@ -286,10 +287,11 @@ def run_dpa_with_cp(
     else:
         cp_comm_group = dist.new_group(cp_comm_ranks, backend="nccl")
         if cp_comm_type == "a2a+p2p":
-            assert world_size % 2 == 0, (
-                "{cp_comm_type=} requires world_size % 2 = 0 as it assumes the a2a level has"
-                " cp_size = 2."
-            )
+            if world_size % 2 != 0:
+                raise ValueError(
+                    f"{cp_comm_type=} requires world_size % 2 = 0 as it assumes the a2a level has"
+                    " cp_size = 2."
+                )
             cp_comm_sub_ranks = [range(i * 2, (i + 1) * 2) for i in range(world_size // 2)]
             cp_comm_sub_ranks += [range(i, world_size, 2) for i in range(2)]
             for sub_ranks in cp_comm_sub_ranks:
@@ -395,7 +397,7 @@ def run_dpa_with_cp(
         }
         attn_bias_shape = bias_shape_map.get(config.bias_shape)
         if attn_bias_shape is None:
-            assert False, f"cuDNN does not support {config.bias_shape=}"
+            raise ValueError(f"cuDNN does not support {config.bias_shape=}")
         bias = torch.randn(*attn_bias_shape, dtype=dtypes[dtype]).cuda()
         # cuDNN does not support dbias calculation for 111s as of cuDNN 9.18
         # TODO(KshitijLakhani): Set requires_grad to True for all shapes once 111s is supported
@@ -477,7 +479,7 @@ def run_dpa_with_cp(
         q_, dout_ = [x.index_select(0, seq_idx_q) for x in [q_, dout_]]
         k_, v_ = [x.index_select(0, seq_idx_kv) for x in [k_, v_]]
     else:
-        assert False, f"{qkv_format} is an unsupported qkv_format!"
+        raise ValueError(f"{qkv_format} is an unsupported qkv_format!")
     q_, k_, v_, dout_ = [x.contiguous() for x in [q_, k_, v_, dout_]]
     if scaling_mode == "delayed":
         qkv_quantizer.scale.fill_(1.0)
