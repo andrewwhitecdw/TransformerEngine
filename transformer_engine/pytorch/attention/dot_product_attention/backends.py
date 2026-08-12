@@ -388,10 +388,10 @@ class UnfusedDotProductAttention(torch.nn.Module):
         key_layer: torch.Tensor,
         value_layer: torch.Tensor,
         qkv_layout: str = "sbh3d",
-        cu_seqlens_q: Optional[torch.Tensor] = None,  # pylint: disable=unused-argument
-        cu_seqlens_kv: Optional[torch.Tensor] = None,  # pylint: disable=unused-argument
-        max_seqlen_q: Optional[torch.Tensor] = None,  # pylint: disable=unused-argument
-        max_seqlen_kv: Optional[torch.Tensor] = None,  # pylint: disable=unused-argument
+        cu_seqlens_q: Optional[torch.Tensor] = None,
+        cu_seqlens_kv: Optional[torch.Tensor] = None,
+        max_seqlen_q: Optional[int] = None,
+        max_seqlen_kv: Optional[int] = None,
         attn_mask_type: str = "causal",
         attention_mask: Optional[Union[torch.Tensor, Tuple[torch.Tensor, torch.Tensor]]] = None,
         window_size: Optional[Tuple[int, int]] = None,
