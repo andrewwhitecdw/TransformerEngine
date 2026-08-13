@@ -12,4 +12,3 @@
 TEST(QKVFormatToString, BHSD) {
   EXPECT_EQ(transformer_engine::to_string(NVTE_QKV_Format::NVTE_BHSD), "NVTE_BHSD");
 }
-
