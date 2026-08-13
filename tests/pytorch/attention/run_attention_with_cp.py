@@ -237,7 +237,7 @@ def run_dpa_with_cp(
         # THD branch below rewrites attn_mask_type in place, which would
         # otherwise leak into subsequent cases reusing the same model key.
         config = copy.deepcopy(model_configs_flash_attn[model])
-    if kernel_backend == "FusedAttention":
+    elif kernel_backend == "FusedAttention":
         os.environ["NVTE_FUSED_ATTN"] = "1"
         if model in model_configs_fused_attn:
             config = copy.deepcopy(model_configs_fused_attn[model])
