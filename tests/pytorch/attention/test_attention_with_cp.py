@@ -612,7 +612,7 @@ def test_cp_with_fused_attention(
     if scaling_mode == "mxfp8" and fp8_mha:
         pytest.skip("No support for scaling_mode=mxfp8 with fp8_mha=True!")
 
-    dtypes = {"fp16": torch.float16, "bf16": torch.bfloat16, "fp8": torch.bfloat16}
+    dtypes = {"fp16": torch.float16, "bf16": torch.bfloat16}
 
     if qkv_format == "thd":
         config = copy.deepcopy(config)
