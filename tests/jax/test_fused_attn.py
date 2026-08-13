@@ -849,6 +849,7 @@ class FusedAttnRunner:
                             self.segment_pos_q,
                             self.segment_pos_kv,
                             self.attn_mask_type,
+                            window_size=self.window_size,
                         )
                 case SeqDescFormat.Seqlens:
                     self.sequence_desciptor = SequenceDescriptor.from_seqlens(
@@ -1850,3 +1851,34 @@ class TestFusedAttnWithDeterminism:
             swa,
             seq_desc_format,
         )
+
+
+@pytest.mark.skipif(_deterministic, reason="Test non-determinism only")
+def test_fused_attn_mask_format_includes_swa():
+    """
+    Regression test for the Mask-format SequenceDescriptor ignoring window_size.
+    When SWA is enabled, the mask-format sequence descriptor passed to the
+    customcall must match the reference mask built with the same sliding window.
+    """
+    s_kv = 128
+    attn_mask_type = AttnMaskType.CAUSAL_MASK
+    runner = FusedAttnRunner(
+        batch_size=2,
+        max_seqlen_q=s_kv,
+        max_seqlen_kv=s_kv,
+        num_heads_q=4,
+        num_heads_kv=4,
+        head_dim_qk=64,
+        head_dim_v=64,
+        attn_bias_type=AttnBiasType.NO_BIAS,
+        attn_mask_type=attn_mask_type,
+        softmax_type=AttnSoftmaxType.VANILLA_SOFTMAX,
+        dropout_prob=0.0,
+        dtype=jnp.float16,
+        is_training=False,
+        qkv_layout=QKVLayout.BSHD_BSHD_BSHD,
+        bias_shape=None,
+        window_size=_get_swa_window_size_for_test(s_kv, attn_mask_type),
+        seq_desc_format=SeqDescFormat.Mask,
+    )
+    runner.test_forward()
