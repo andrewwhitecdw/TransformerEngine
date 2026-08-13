@@ -287,13 +287,10 @@ def jax_dpa(query, key, value, bias, softmax_offset, mask, dropout_rng, **kwargs
             raise ValueError(
                 "score_mod reference path expects separate BSHD query/key/value tensors."
             )
-        deterministic = not kwargs["is_training"]
-        dropout_probability = kwargs["dropout_probability"]
-        softmax_type = kwargs["softmax_type"]
-    else:
-        deterministic = not kwargs["is_training"]
-        dropout_probability = kwargs["dropout_probability"]
-        softmax_type = kwargs["softmax_type"]
+
+    deterministic = not kwargs["is_training"]
+    dropout_probability = kwargs["dropout_probability"]
+    softmax_type = kwargs["softmax_type"]
     output = general_dot_product_attention(
         query,
         key,
