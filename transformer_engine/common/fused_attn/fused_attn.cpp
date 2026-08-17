@@ -68,6 +68,8 @@ std::string to_string(NVTE_QKV_Layout layout) {
       return "NVTE_Paged_KV_THD_BSHD_BSHD";
     case NVTE_Paged_KV_THD_SBHD_SBHD:
       return "NVTE_Paged_KV_THD_SBHD_SBHD";
+    case NVTE_BHSD_BHSD_BHSD:
+      return "NVTE_BHSD_BHSD_BHSD";
     default:
       return "UNKNOWN_QKV_LAYOUT(" + std::to_string(static_cast<int>(layout)) + ")";
   }
